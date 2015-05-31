@@ -14,14 +14,12 @@ NODE = nodefunctions.NodeFunctions()
 
 __addon__        = sys.modules[ "__main__" ].__addon__
 __addonid__      = sys.modules[ "__main__" ].__addonid__
-__cwd__          = sys.modules[ "__main__" ].__cwd__
 __language__     = sys.modules[ "__main__" ].__language__
-__xbmcversion__  = xbmc.getInfoLabel( "System.BuildVersion" ).split(".")[0]
-__resource__     = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'lib' ) ).decode("utf-8")
-__datapath__     = xbmc.translatePath( "special://profile/addon_data/script.skinshortcuts" ).decode( 'utf-8' )
-__profilepath__  = xbmc.translatePath( "special://profile/" ).decode('utf-8')
-__skinpath__     = xbmc.translatePath( "special://skin/shortcuts/" ).decode('utf-8')
-__defaultpath__  = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'shortcuts').encode("utf-8") ).decode("utf-8")
+__datapath__     = sys.modules[ "__main__" ].__datapath__
+__skinpath__     = sys.modules[ "__main__" ].__skinpath__
+__defaultpath__  = sys.modules[ "__main__" ].__defaultpath__
+__profilepath__  = sys.modules[ "__main__" ].__profilepath__
+__xbmcversion__  = sys.modules[ "__main__" ].__xbmcversion__
 
 # character entity reference
 CHAR_ENTITY_REXP = re.compile('&(%s);' % '|'.join(name2codepoint))
@@ -121,7 +119,7 @@ class DataFunctions():
         if profileDir is None:
             profileDir = xbmc.translatePath("special://profile/").decode("utf-8")
 
-        userShortcuts = os.path.join(profileDir, "addon_data/script.skinshortcuts", self.slugify(group) + ".DATA.xml")#.encode('utf-8')
+        userShortcuts = os.path.join(profileDir, "addon_data", __addonid__, self.slugify(group) + ".DATA.xml")#.encode('utf-8')
         skinShortcuts = os.path.join(__skinpath__ , self.slugify(group) + ".DATA.xml")#.encode('utf-8')
         defaultShortcuts = os.path.join(__defaultpath__ , self.slugify(group) + ".DATA.xml")#.encode('utf-8')
         if defaultGroup is not None:

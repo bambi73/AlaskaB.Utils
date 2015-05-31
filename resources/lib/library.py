@@ -20,10 +20,10 @@ __addon__        = sys.modules[ "__main__" ].__addon__
 __addonid__      = sys.modules[ "__main__" ].__addonid__
 __cwd__          = sys.modules[ "__main__" ].__cwd__
 __language__     = sys.modules[ "__main__" ].__language__
-__datapath__     = xbmc.translatePath( "special://profile/addon_data/script.skinshortcuts" ).decode( 'utf-8' )
-__skinpath__     = xbmc.translatePath( "special://skin/shortcuts/" ).decode('utf-8')
-__defaultpath__  = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'shortcuts').encode("utf-8") ).decode("utf-8")
-__xbmcversion__  = xbmc.getInfoLabel( "System.BuildVersion" ).split(".")[0]
+__datapath__     = sys.modules[ "__main__" ].__datapath__
+__skinpath__     = sys.modules[ "__main__" ].__skinpath__
+__defaultpath__  = sys.modules[ "__main__" ].__defaultpath__
+__xbmcversion__  = sys.modules[ "__main__" ].__xbmcversion__
 
 def log(txt):
     try:

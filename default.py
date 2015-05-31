@@ -17,18 +17,18 @@ else:
     import json as simplejson
 
 __addon__        = xbmcaddon.Addon()
-__addonid__      = __addon__.getAddonInfo('id').decode( 'utf-8' )
+__addonid__      = __addon__.getAddonInfo('id').decode("utf-8")
 __addonversion__ = __addon__.getAddonInfo('version')
-__language__     = __addon__.getLocalizedString
 __cwd__          = __addon__.getAddonInfo('path').decode("utf-8")
 __addonname__    = __addon__.getAddonInfo('name').decode("utf-8")
-__resource__     = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'lib' ) ).decode("utf-8")
-__datapath__     = xbmc.translatePath( "special://profile/addon_data/script.skinshortcuts" ).decode( 'utf-8' )
-__masterpath__   = xbmc.translatePath( "special://masterprofile/addon_data/script.skinshortcuts" ).decode( 'utf-8' )
-__profilepath__  = xbmc.translatePath( "special://profile/" ).decode('utf-8')
-__skinpath__     = xbmc.translatePath( "special://skin/shortcuts/" ).decode('utf-8')
-__defaultpath__  = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'shortcuts').encode("utf-8") ).decode("utf-8")
-__xbmcversion__  = xbmc.getInfoLabel( "System.BuildVersion" ).split(".")[0]
+__language__     = __addon__.getLocalizedString
+__resource__     = xbmc.translatePath(os.path.join(__cwd__, 'resources', 'lib')).decode("utf-8")
+__datapath__     = os.path.join(xbmc.translatePath("special://profile/addon_data").decode("utf-8"), __addonid__)
+__masterpath__   = os.path.join(xbmc.translatePath("special://masterprofile/addon_data").decode("utf-8"), __addonid__)
+__profilepath__  = xbmc.translatePath("special://profile/").decode("utf-8")
+__skinpath__     = xbmc.translatePath("special://skin/shortcuts/").decode("utf-8")
+__defaultpath__  = xbmc.translatePath(os.path.join(__cwd__, 'resources', 'shortcuts').encode("utf-8")).decode("utf-8")
+__xbmcversion__  = xbmc.getInfoLabel("System.BuildVersion").split(".")[0]
 
 sys.path.append(__resource__)
 
@@ -41,9 +41,9 @@ hashlist = []
 
 def log(txt):
     if isinstance (txt, str):
-        txt = txt.decode('utf-8')
+        txt = txt.decode("utf-8")
     message = u'%s: %s' % (__addonid__, txt)
-    xbmc.log(msg=message.encode('utf-8'), level=xbmc.LOGDEBUG)
+    xbmc.log(msg=message.encode("utf-8"), level=xbmc.LOGDEBUG)
 
 class Main:
     # MAIN ENTRY POINT
@@ -88,7 +88,7 @@ class Main:
 
     def _manage_shortcuts(self, group, groupname):
         import gui
-        ui = gui.GUI( "script-skinshortcuts.xml", __cwd__, "default", group=group, defaultGroup=None, nolabels="false", groupname=groupname )
+        ui = gui.GUI( "script-skinshortcuts-2.xml", __cwd__, "default", group=group, defaultGroup=None, nolabels="false", groupname=groupname )
 
         ui.doModal()
         del ui
@@ -112,7 +112,7 @@ class Main:
                 if files:
                     for file in files:
                         if file != "settings.xml":
-                            file_path = os.path.join(__datapath__, file.decode('utf-8')).encode('utf-8')
+                            file_path = os.path.join(__datapath__, file.decode("utf-8")).encode("utf-8")
                             if xbmcvfs.exists(file_path):
                                 try:
                                     xbmcvfs.delete(file_path)

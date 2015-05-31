@@ -12,11 +12,8 @@ else:
 
 __addonid__      = sys.modules[ "__main__" ].__addonid__
 __language__     = sys.modules[ "__main__" ].__language__
-__cwd__          = sys.modules[ "__main__" ].__cwd__
-__xbmcversion__  = xbmc.getInfoLabel( "System.BuildVersion" ).split(".")[0]
-__datapath__     = xbmc.translatePath( "special://profile/addon_data/script.skinshortcuts" ).decode( 'utf-8' )
-__masterpath__   = xbmc.translatePath( "special://masterprofile/addon_data/script.skinshortcuts" ).decode( 'utf-8' )
-__skin__         = xbmc.translatePath( "special://skin/" )    
+__masterpath__   = sys.modules[ "__main__" ].__masterpath__
+__xbmcversion__  = sys.modules[ "__main__" ].__xbmcversion__
 
 import datafunctions
 DATA = datafunctions.DataFunctions()
