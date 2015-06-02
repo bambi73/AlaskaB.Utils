@@ -374,14 +374,6 @@ class GUI(xbmcgui.WindowXMLDialog):
         self.__parse_shortcut2_action(shortcut, listitem, "up")
         self.__parse_shortcut2_action(shortcut, listitem, "down")
 
-        if not listitem.getProperty("mainAction"): 
-            if listitem.getProperty("path"):
-                listitem.setProperty("mainAction", listitem.getProperty("path"))
-                listitem.setProperty("mainActionHeader", listitem.getLabel())
-        elif listitem.getProperty("mainAction") != listitem.getProperty("path"): 
-            listitem.setProperty("path", listitem.getProperty("mainAction"))
-            listitem.setProperty("displayPath", listitem.getProperty("mainAction"))
-
 
     def _get_icon_overrides(self, listitem, setToDefault=True):
         # Start by getting the labelID

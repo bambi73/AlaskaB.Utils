@@ -193,6 +193,14 @@ class DataFunctions():
 
             # Get the action
             action = node.find("action")
+            mainAction = node.find("mainAction")
+            
+            if mainAction is None:
+                mainAction = xmltree.SubElement(node, "mainAction")
+                xmltree.SubElement(mainAction, "action").text = action.text
+                xmltree.SubElement(mainAction, "header").text = self.local(node.find("label").text)[2]
+            elif mainAction.find("action").text != action.text:
+                action.text = mainAction.find("action").text
 
             # group overrides: add an additional onclick action for a particular menu
             # this will allow you to close a modal dialog before calling any other window
