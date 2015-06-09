@@ -58,7 +58,7 @@ class Main:
             xbmcvfs.mkdir(__masterpath__)
 
         if self.TYPE == "buildxml":
-            XML.buildMenu(self.MENUID, self.GROUP, self.LEVELS, self.MODE, self.OPTIONS)
+            XML.buildMenu(self.MAINMENUID, self.GROUP, "0", None, "")
         elif self.TYPE == "manage":
             self._manage_shortcuts(self.GROUP, self.GROUPNAME)
         elif self.TYPE == "resetall":

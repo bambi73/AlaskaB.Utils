@@ -198,9 +198,12 @@ class DataFunctions():
             if mainAction is None:
                 mainAction = xmltree.SubElement(node, "mainAction")
                 xmltree.SubElement(mainAction, "action").text = action.text
-                xmltree.SubElement(mainAction, "header").text = self.local(node.find("label").text)[2]
-            elif mainAction.find("action").text != action.text:
-                action.text = mainAction.find("action").text
+                xmltree.SubElement(mainAction, "heading").text = self.local(node.find("label").text)[2]
+            else:
+                if mainAction.find("action").text != action.text:
+                    action.text = mainAction.find("action").text
+                if mainAction.find("heading") is None:
+                    xmltree.SubElement(mainAction, "heading").text = self.local(node.find("label").text)[2]
 
             # group overrides: add an additional onclick action for a particular menu
             # this will allow you to close a modal dialog before calling any other window
@@ -242,7 +245,7 @@ class DataFunctions():
                 xmltree.SubElement(node, "override-icon").text = overridenIcon
 
             # If the action uses the special://skin protocol, translate it
-            if "special://skin/" in action.text:
+            if "special://skin/" in action.text and __addon__.getSetting("translate_skin_path") == "true":
                 action.text = xbmc.translatePath(action.text)
 
             # Get visibility condition

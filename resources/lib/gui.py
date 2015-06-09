@@ -292,7 +292,7 @@ class GUI(xbmcgui.WindowXMLDialog):
 
         # Set the action
         action = item.find("action").text
-        if "special://skin/" in action:
+        if "special://skin/" in action and __addon__.getSetting("translate_skin_path") == "true":
             translate = xbmc.translatePath("special://skin/").decode("utf-8")
             action = action.replace("special://skin/", translate)
         listitem.setProperty("path", action)
@@ -361,12 +361,12 @@ class GUI(xbmcgui.WindowXMLDialog):
                 action3Element = subElement.find("action3")
                 if action3Element is not None and len(action3Element.text) > 0:
                     listitem.setProperty("%sAction3" % prefix, action3Element.text)
-                headerElement = subElement.find("header")
-                if headerElement is not None and len(headerElement.text) > 0:
-                    listitem.setProperty("%sActionHeader" % prefix, headerElement.text)
-                subHeaderElement = subElement.find("subHeader")
-                if subHeaderElement is not None and len(subHeaderElement.text) > 0:
-                    listitem.setProperty("%sActionSubHeader" % prefix, subHeaderElement.text)
+                headingElement = subElement.find("heading")
+                if headingElement is not None and len(headingElement.text) > 0:
+                    listitem.setProperty("%sActionHeading" % prefix, headingElement.text)
+                subheadingElement = subElement.find("subheading")
+                if subheadingElement is not None and len(subheadingElement.text) > 0:
+                    listitem.setProperty("%sActionSubheading" % prefix, subheadingElement.text)
         
 
     def __parse_shortcut2(self, shortcut, listitem):
@@ -646,12 +646,12 @@ class GUI(xbmcgui.WindowXMLDialog):
             if len(actionList) > 2:
                 xmltree.SubElement(actionElement, "action3").text = actionList[2]
             
-            header = listitem.getProperty("%sActionHeader" % prefix)
-            if header and len(header) > 0:
-                xmltree.SubElement(actionElement, "header").text = DATA.local(header)[0]
-            subHeader = listitem.getProperty("%sActionSubHeader" % prefix)
-            if subHeader and len(subHeader) > 0:
-                xmltree.SubElement(actionElement, "subHeader").text = subHeader
+            heading = listitem.getProperty("%sActionHeading" % prefix)
+            if heading and len(heading) > 0:
+                xmltree.SubElement(actionElement, "heading").text = DATA.local(heading)[0]
+            subheading = listitem.getProperty("%sActionSubheading" % prefix)
+            if subheading and len(subheading) > 0:
+                xmltree.SubElement(actionElement, "subheading").text = subheading
       
       
     def __save_shortcuts2(self, shortcut, listitem):
@@ -1464,20 +1464,20 @@ class GUI(xbmcgui.WindowXMLDialog):
                 actionEditDirection = currentWindow.getProperty("actionEditDirection")
 
                 listitem = self.getControl(211).getSelectedItem()
-                headerLabel = listitem.getProperty("%sActionHeader" % actionEditDirection.lower())
+                headingLabel = listitem.getProperty("%sActionHeading" % actionEditDirection.lower())
     
-                keyboard = xbmc.Keyboard(headerLabel, "Enter Header label", False)
+                keyboard = xbmc.Keyboard(headingLabel, "Enter Heading label", False)
                 keyboard.doModal()
                 
                 if keyboard.isConfirmed():
-                    headerLabel = keyboard.getText()
-                    if headerLabel == "":
-                        headerLabel = None
+                    headingLabel = keyboard.getText()
+                    if headingLabel == "":
+                        headingLabel = None
                 else:
                     return
     
                 self.changeMade = True
-                listitem.setProperty("%sActionHeader" % actionEditDirection.lower(), headerLabel)
+                listitem.setProperty("%sActionHeading" % actionEditDirection.lower(), headingLabel)
     
         if controlID == 461:
             currentWindow = xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
@@ -1485,20 +1485,20 @@ class GUI(xbmcgui.WindowXMLDialog):
                 actionEditDirection = currentWindow.getProperty("actionEditDirection")
 
                 listitem = self.getControl(211).getSelectedItem()
-                headerLabel = listitem.getProperty("%sActionSubHeader" % actionEditDirection.lower())
+                subheadingLabel = listitem.getProperty("%sActionSubheading" % actionEditDirection.lower())
     
-                keyboard = xbmc.Keyboard(headerLabel, "Enter SubHeader label", False)
+                keyboard = xbmc.Keyboard(subheadingLabel, "Enter Subheading label", False)
                 keyboard.doModal()
                 
                 if keyboard.isConfirmed():
-                    headerLabel = keyboard.getText()
-                    if headerLabel == "":
-                        headerLabel = None
+                    subheadingLabel = keyboard.getText()
+                    if subheadingLabel == "":
+                        subheadingLabel = None
                 else:
                     return
     
                 self.changeMade = True
-                listitem.setProperty("%sActionSubHeader" % actionEditDirection.lower(), headerLabel)
+                listitem.setProperty("%sActionSubheading" % actionEditDirection.lower(), subheadingLabel)
     
         if controlID == 462:
             self.__selectShortcutHelper(1)
@@ -1542,17 +1542,21 @@ class GUI(xbmcgui.WindowXMLDialog):
                     LIBRARY._delete_playlist(self.getControl(211).getListItem(selectedPosition).getProperty("path"))
 
                     listitemCopy.setProperty("%sAction" % actionEditDirection.lower(), listitemCopy.getProperty("path"))
-                    listitemCopy.setProperty("%sActionHeader" % actionEditDirection.lower(), listitemCopy.getLabel())
-                    listitemCopy.setProperty("%sActionSubHeader" % actionEditDirection.lower(), None)
+                    listitemCopy.setProperty("%sActionHeading" % actionEditDirection.lower(), listitemCopy.getLabel())
+                    listitemCopy.setProperty("%sActionSubheading" % actionEditDirection.lower(), None)
 
                     self.allListItems[orderIndex] = listitemCopy
                     self._display_listitems(selectedPosition)
                 else:
-                    action = selectedShortcut.getProperty("path")
+                    if selectedShortcut.getProperty("chosenPath"):
+                        action = selectedShortcut.getProperty("chosenPath")
+                    else:
+                        action = selectedShortcut.getProperty("path")
+                        
                     if actionIndex == 1:
                         self.allListItems[orderIndex].setProperty("%sAction" % actionEditDirection.lower(), action)
-                        self.allListItems[orderIndex].setProperty("%sActionHeader" % actionEditDirection.lower(), selectedShortcut.getLabel())
-                        self.allListItems[orderIndex].setProperty("%sActionSubHeader" % actionEditDirection.lower(), None)
+                        self.allListItems[orderIndex].setProperty("%sActionHeading" % actionEditDirection.lower(), selectedShortcut.getLabel())
+                        self.allListItems[orderIndex].setProperty("%sActionSubheading" % actionEditDirection.lower(), None)
                     else:
                         self.allListItems[orderIndex].setProperty("%sAction%d" % (actionEditDirection.lower(), actionIndex), action)
 
@@ -1642,18 +1646,18 @@ class GUI(xbmcgui.WindowXMLDialog):
       listitemCopy.setProperty("mainAction", listitem.getProperty("mainAction"))
       listitemCopy.setProperty("mainAction2", listitem.getProperty("mainAction2"))
       listitemCopy.setProperty("mainAction3", listitem.getProperty("mainAction3"))
-      listitemCopy.setProperty("mainActionHeader", listitem.getProperty("mainActionHeader"))
-      listitemCopy.setProperty("mainActionSubHeader", listitem.getProperty("mainActionSubHeader"))
+      listitemCopy.setProperty("mainActionHeading", listitem.getProperty("mainActionHeading"))
+      listitemCopy.setProperty("mainActionSubheading", listitem.getProperty("mainActionSubheading"))
       listitemCopy.setProperty("upAction", listitem.getProperty("upAction"))
       listitemCopy.setProperty("upAction2", listitem.getProperty("upAction2"))
       listitemCopy.setProperty("upAction3", listitem.getProperty("upAction3"))
-      listitemCopy.setProperty("upActionHeader", listitem.getProperty("upActionHeader"))
-      listitemCopy.setProperty("upActionSubHeader", listitem.getProperty("upActionSubHeader"))
+      listitemCopy.setProperty("upActionHeading", listitem.getProperty("upActionHeading"))
+      listitemCopy.setProperty("upActionSubheading", listitem.getProperty("upActionSubheading"))
       listitemCopy.setProperty("downAction", listitem.getProperty("downAction"))
       listitemCopy.setProperty("downAction2", listitem.getProperty("downAction2"))
       listitemCopy.setProperty("downAction3", listitem.getProperty("downAction3"))
-      listitemCopy.setProperty("downActionHeader", listitem.getProperty("downActionHeader"))
-      listitemCopy.setProperty("downActionSubHeader", listitem.getProperty("downActionSubHeader"))
+      listitemCopy.setProperty("downActionHeading", listitem.getProperty("downActionHeading"))
+      listitemCopy.setProperty("downActionSubheading", listitem.getProperty("downActionSubheading"))
 
 
     def _add_additionalproperty(self, listitem, propertyName, propertyValue):

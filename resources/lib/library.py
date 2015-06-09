@@ -1030,9 +1030,14 @@ class LibraryFunctions():
             videolist = []
             log('Loading playlists...')
             paths = [['special://videoplaylists/','32004','VideoLibrary'], ['special://musicplaylists/','32005','MusicLibrary'], ["special://skin/playlists/",'32059',None], ["special://skin/extras/",'32059',None]]
+            
+            stringForce = None
+            if __addon__.getSetting("translate_skin_path") == "true":
+                stringForce = "special://skin/"
+            
             for path in paths:
                 count = 0
-                for root, subdirs, files in kodiwalk( path[0], stringForce = "special://skin/" ):
+                for root, subdirs, files in kodiwalk( path[0], stringForce = stringForce ):
                     for file in files:
                         playlist = file['path']
                         label = file['label']
@@ -1059,6 +1064,8 @@ class LibraryFunctions():
                                     listitem = self._create(["::PLAYLIST::", name, path[1], {"icon": "DefaultPlaylist.png"} ])
                                     listitem.setProperty( "action-play", "PlayMedia(" + playlist + ")" )
                                     listitem.setProperty( "action-show", "ActivateWindow(" + mediaLibrary + "," + playlist + ",return)".encode( 'utf-8' ) )
+                                    
+                                    log("playlist: %s" % playlist)
                                     
                                     if mediaLibrary == "VideoLibrary":
                                         videolist.append( listitem )

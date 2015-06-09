@@ -10,7 +10,9 @@ if sys.version_info < (2, 7):
 else:
     import json as simplejson
 
+__addon__        = sys.modules[ "__main__" ].__addon__
 __addonid__      = sys.modules[ "__main__" ].__addonid__
+__addonversion__ = sys.modules[ "__main__" ].__addonversion__
 __language__     = sys.modules[ "__main__" ].__language__
 __masterpath__   = sys.modules[ "__main__" ].__masterpath__
 __xbmcversion__  = sys.modules[ "__main__" ].__xbmcversion__
@@ -66,10 +68,10 @@ class XMLFunctions():
         else:
             profilelist = [["special://masterprofile", None]]
 
-        if self.shouldwerun(profilelist) == False:
-            log("Menu is up to date")
-            xbmcgui.Window(10000).clearProperty("skinshortcuts-isrunning")
-            return
+#        if self.shouldwerun(profilelist) == False:
+#            log("Menu is up to date")
+#            xbmcgui.Window(10000).clearProperty("skinshortcuts-isrunning")
+#            return
 
         progress = None
         # Create a progress dialog
@@ -533,7 +535,8 @@ class XMLFunctions():
             newelement.set("id", str(itemid))
 
         # Label and label2
-        xmltree.SubElement(newelement, "label").text = DATA.local(item.find("label").text)[1]
+        labelText = DATA.local(item.find("label").text)[1]
+        xmltree.SubElement(newelement, "label").text = labelText
         xmltree.SubElement(newelement, "label2").text = DATA.local(item.find("label2").text)[1]
 
         # Icon and thumb
@@ -561,65 +564,121 @@ class XMLFunctions():
         if visibility is not None:
             xmltree.SubElement(newelement, "visible").text = visibility.text
 
-        #additional onclick (group overrides)
-        onclicks = item.findall("additional-action")
-        for onclick in onclicks:
-            onclickelement = xmltree.SubElement(newelement, "onclick")
-            onclickelement.text = onclick.text
-            if "condition" in onclick.attrib:
-                onclickelement.set("condition", onclick.attrib.get("condition"))
+        for prefix in ["main", "up", "down"]:
+            mainActionElement = item.find("%sAction" % prefix)
+            onclicks = []
 
-        # Onclick
-        onclicks = item.findall("override-action")
-        if len(onclicks) == 0:
-            onclicks = item.findall("action")
+            if mainActionElement is not None:
+                actionElement = mainActionElement.find("action")
+                if actionElement is not None and len(actionElement.text) > 0:
+                    action2Element = mainActionElement.find("action2")
+                    action3Element = mainActionElement.find("action3")
 
-        for onclick in onclicks:
-            onclickelement = xmltree.SubElement(newelement, "onclick")
-            # PVR Action
-            if onclick.text.startswith("pvr-channel://"):
-                # PVR action
-                onclickelement.text = "RunScript(script.skinshortcuts,type=launchpvr&channel=" + onclick.text.replace("pvr-channel://", "") + ")"
-            elif onclick.text.startswith("ActivateWindow(") and xbmc.translatePath("special://skin/") in onclick.text:
-                # Skin-relative links
-                try:
-                    actionParts = onclick.text[15:-1].split(",")
-                    actionParts[1] = actionParts[1].replace(xbmc.translatePath("special://skin/"), "")
-                    path = actionParts[1].split(os.sep)
-                    newAction = "special://skin"
-                    for actionPart in actionParts[1].split(os.sep):
-                        if actionPart != "":
-                            newAction = newAction + "/" + actionPart
-                    if len(actionParts) == 2:
-                        onclickelement.text = "ActivateWindow(" + actionParts[0] + "," + newAction + ")"
-                    else:
-                        onclickelement.text = "ActivateWindow(" + actionParts[0] + "," + newAction + "," + actionParts[2] + ")"
-                except:
-                    pass
-            else:
-                onclickelement.text = onclick.text
+                    onclicks.append(actionElement)
+                    if action2Element is not None and len(action2Element.text) > 0:
+                        onclicks.append(action2Element)
+                    if action3Element is not None and len(action3Element.text) > 0:
+                        onclicks.append(action3Element)
 
-            # Also add it as a path property
-            pathelement = xmltree.SubElement(newelement, "property")
-            pathelement.set("name", "path")
-            pathelement.text = onclickelement.text
+                    headingElement = mainActionElement.find("heading")
+                    if headingElement is not None and len(headingElement.text) > 0:
+                        if prefix == "main":
+                            onclickelement = xmltree.SubElement(newelement, "onclick")
+                            onclickelement.text = "SetProperty(AlaskaB.HeadingLabel,%s,Home)" % headingElement.text
+                        else:
+                            pathelement = xmltree.SubElement(newelement, "property")
+                            pathelement.set("name", "%sHeading" % prefix)
+                            pathelement.text = headingElement.text
+                    elif prefix == "main":
+                        onclickelement = xmltree.SubElement(newelement, "onclick")
+                        onclickelement.text = "SetProperty(AlaskaB.HeadingLabel,%s,home)" % labelText
 
-            if onclick.text == "ActivateWindow(Settings)":
-                self.hasSettings = True
+                    subheadingElement = mainActionElement.find("subheading")
+                    if subheadingElement is not None and len(subheadingElement.text) > 0:
+                        if prefix == "main":
+                            onclickelement = xmltree.SubElement(newelement, "onclick")
+                            onclickelement.text = "SetProperty(AlaskaB.SubheadingLabel,%s,Home)" % subheadingElement.text
+                        else:
+                            pathelement = xmltree.SubElement(newelement, "property")
+                            pathelement.set("name", "%sSubheading" % prefix)
+                            pathelement.text = subheadingElement.text
+                    elif prefix == "main":
+                        onclickelement = xmltree.SubElement(newelement, "onclick")
+                        onclickelement.text = "ClearProperty(AlaskaB.SubheadingLabel,Home)"
+    
+            if len(onclicks) == 0 and prefix == "main":
+                #additional onclick (group overrides)
+                onclicks = item.findall("additional-action")
+                for onclick in onclicks:
+                    onclickelement = xmltree.SubElement(newelement, "onclick")
+                    onclickelement.text = onclick.text
+                    if "condition" in onclick.attrib:
+                        onclickelement.set("condition", onclick.attrib.get("condition"))
+        
+                # Onclick
+                onclicks = item.findall("override-action")
+                if len(onclicks) == 0:
+                    onclicks = item.findall("action")
+    
+            pathProperty = None
+    
+            for index, onclick in enumerate(onclicks, start=1):
+                if prefix == "main":
+                    onclickelement = xmltree.SubElement(newelement, "onclick")
+                elif index > 1:
+                    onclickelement = xmltree.SubElement(newelement, "property")
+                    onclickelement.set("name", "%sAction%d" % (prefix, index))
+                else:
+                    onclickelement = xmltree.SubElement(newelement, "property")
+                    onclickelement.set("name", "%sAction" % prefix)
+                    
+                # PVR Action
+                if onclick.text.startswith("pvr-channel://"):
+                    # PVR action
+                    onclickelement.text = "RunScript(script.skinshortcuts,type=launchpvr&channel=" + onclick.text.replace("pvr-channel://", "") + ")"
+                elif onclick.text.startswith("ActivateWindow(") and xbmc.translatePath("special://skin/") in onclick.text and __addon__.getSetting("translate_skin_path") == "true":
+                    # Skin-relative links
+                    try:
+                        actionParts = onclick.text[15:-1].split(",")
+                        actionParts[1] = actionParts[1].replace(xbmc.translatePath("special://skin/"), "")
+                        path = actionParts[1].split(os.sep)
+                        newAction = "special://skin"
+                        for actionPart in actionParts[1].split(os.sep):
+                            if actionPart != "":
+                                newAction = newAction + "/" + actionPart
+                        if len(actionParts) == 2:
+                            onclickelement.text = "ActivateWindow(" + actionParts[0] + "," + newAction + ")"
+                        else:
+                            onclickelement.text = "ActivateWindow(" + actionParts[0] + "," + newAction + "," + actionParts[2] + ")"
+                    except:
+                        pass
+                else:
+                    onclickelement.text = onclick.text
+    
+                if prefix == "main":
+                    pathProperty = onclickelement.text
+    
+                if onclick.text == "ActivateWindow(Settings)":
+                    self.hasSettings = True
+    
+                if "condition" in onclick.attrib:
+                    onclickelement.set("condition", onclick.attrib.get("condition"))
+    
+                if len(self.checkForShortcuts) != 0:
+                    # Check if we've been asked to watch for this shortcut
+                    newCheckForShortcuts = []
+                    for checkforShortcut in self.checkForShortcuts:
+                        if onclick.text.lower() == checkforShortcut[ 0 ]:
+                            # They match, change the value to True
+                            newCheckForShortcuts.append((checkforShortcut[ 0 ], checkforShortcut[ 1 ], "True"))
+                        else:
+                            newCheckForShortcuts.append(checkforShortcut)
+                    self.checkForShortcuts = newCheckForShortcuts
 
-            if "condition" in onclick.attrib:
-                onclickelement.set("condition", onclick.attrib.get("condition"))
-
-            if len(self.checkForShortcuts) != 0:
-                # Check if we've been asked to watch for this shortcut
-                newCheckForShortcuts = []
-                for checkforShortcut in self.checkForShortcuts:
-                    if onclick.text.lower() == checkforShortcut[ 0 ]:
-                        # They match, change the value to True
-                        newCheckForShortcuts.append((checkforShortcut[ 0 ], checkforShortcut[ 1 ], "True"))
-                    else:
-                        newCheckForShortcuts.append(checkforShortcut)
-                self.checkForShortcuts = newCheckForShortcuts
+            if pathProperty is not None:
+                pathelement = xmltree.SubElement(newelement, "property")
+                pathelement.set("name", "path")
+                pathelement.text = pathProperty
 
         # Visibility
         if visibilityCondition is not None:
