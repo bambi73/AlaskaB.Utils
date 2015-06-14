@@ -209,7 +209,13 @@ class GUI(xbmcgui.WindowXMLDialog):
         if includeUserShortcuts:
             shortcuts = DATA._get_shortcuts(self.group, defaultGroup=self.defaultGroup)
         else:
-            shortcuts = DATA._get_shortcuts(self.group, defaultGroup=self.defaultGroup, defaultsOnly=True)
+            useSharedShortcuts = False
+            if self.group == "mainmenu" and DATA._exists_skin_shortcuts(self.group):
+                userchoice = xbmcgui.Dialog().yesno("Loading shortcuts", "Do you want to load skin default shortcuts or", "shared from script.skinshortcuts?", "", "Default", "Shared")
+                if userchoice == True:
+                    useSharedShortcuts = True
+
+            shortcuts = DATA._get_shortcuts(self.group, defaultGroup=self.defaultGroup, defaultsOnly=True, useSharedShortcuts=useSharedShortcuts)
 
         #listitems = []
         for shortcut in shortcuts.getroot().findall("shortcut"):
@@ -1503,11 +1509,20 @@ class GUI(xbmcgui.WindowXMLDialog):
         if controlID == 462:
             self.__selectShortcutHelper(1)
           
+        if controlID == 463:
+            self.__changeShortcutHelper(1)
+          
         if controlID == 464:
             self.__selectShortcutHelper(2)
           
+        if controlID == 465:
+            self.__changeShortcutHelper(2)
+          
         if controlID == 466:
             self.__selectShortcutHelper(3)
+                
+        if controlID == 467:
+            self.__changeShortcutHelper(3)
                 
         if controlID == 469:
             currentWindow = xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
@@ -1518,6 +1533,56 @@ class GUI(xbmcgui.WindowXMLDialog):
     # ========================
     # === HELPER FUNCTIONS ===
     # ========================
+
+
+    def __changeShortcutHelper(self, actionIndex):
+        currentWindow = xbmcgui.Window(xbmcgui.getCurrentWindowDialogId())
+        if currentWindow.getProperty("actionEdit") == "True" and currentWindow.getProperty("actionEditDirection"):
+            actionEditDirection = currentWindow.getProperty("actionEditDirection")
+            listitem = self.getControl(211).getSelectedItem()
+    
+            if self.warnonremoval(listitem) == False:
+                return
+    
+            if actionIndex == 1:
+                originalAction = listitem.getProperty("%sAction" % actionEditDirection.lower())
+            else:
+                originalAction = listitem.getProperty("%sAction%d" % (actionEditDirection.lower(), actionIndex))
+
+            if originalAction == "noop":
+                originalAction = ""
+    
+            keyboard = xbmc.Keyboard(originalAction, xbmc.getLocalizedString(528), False)
+            keyboard.doModal()
+    
+            if keyboard.isConfirmed():
+                try:
+                    newAction = keyboard.getText().decode("utf-8")
+                except:
+                    newAction = keyboard.getText()
+                if newAction == "":
+                    newAction = "noop"
+    
+                if newAction == originalAction:
+                    return
+            else:
+                return
+    
+            if actionEditDirection == "Main" and actionIndex == 1:
+                LIBRARY._delete_playlist(originalAction)
+
+                listitem.setLabel2(__language__(32024))
+                listitem.setProperty("path", newAction)
+                listitem.setProperty("displaypath", newAction)
+                listitem.setProperty("shortcutType", "32024")
+                listitem.setProperty("%sAction" % actionEditDirection.lower(), newAction)
+            else:
+                if actionIndex == 1:
+                    listitem.setProperty("%sAction" % actionEditDirection.lower(), newAction)
+                else:
+                    listitem.setProperty("%sAction%d" % (actionEditDirection.lower(), actionIndex), newAction)
+
+            self.changeMade = True
 
 
     def __selectShortcutHelper(self, actionIndex):

@@ -111,7 +111,13 @@ class DataFunctions():
         self.labelIDList.pop()
 
 
-    def _get_shortcuts(self, group, defaultGroup=None, isXML=False, profileDir=None, defaultsOnly=False):
+    def _exists_skin_shortcuts(self, group):
+        profileDir = xbmc.translatePath("special://profile/").decode("utf-8")
+        skinShortcuts = os.path.join(profileDir, "addon_data", "script.skinshortcuts", self.slugify(group) + ".DATA.xml")
+        return xbmcvfs.exists(skinShortcuts)
+
+
+    def _get_shortcuts(self, group, defaultGroup=None, isXML=False, profileDir=None, defaultsOnly=False, useSharedShortcuts=False):
         # This will load the shortcut file
         # Additionally, if the override files haven't been loaded, we'll load them too
         log("Loading shortcuts for group " + group)
@@ -127,9 +133,13 @@ class DataFunctions():
             defaultShortcuts = os.path.join(__defaultpath__ , self.slugify(defaultGroup) + ".DATA.xml")#.encode('utf-8')
 
         if defaultsOnly:
-            paths = [skinShortcuts, defaultShortcuts ]
+            if useSharedShortcuts:
+                sharedShortcuts = os.path.join(profileDir, "addon_data", "script.skinshortcuts", self.slugify(group) + ".DATA.xml")
+                paths = [ sharedShortcuts, defaultShortcuts ]
+            else:
+                paths = [ skinShortcuts, defaultShortcuts ]
         else:
-            paths = [userShortcuts, skinShortcuts, defaultShortcuts ]
+            paths = [ userShortcuts, skinShortcuts, defaultShortcuts ]
 
         for path in paths:
             try:

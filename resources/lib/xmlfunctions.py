@@ -68,10 +68,10 @@ class XMLFunctions():
         else:
             profilelist = [["special://masterprofile", None]]
 
-#        if self.shouldwerun(profilelist) == False:
-#            log("Menu is up to date")
-#            xbmcgui.Window(10000).clearProperty("skinshortcuts-isrunning")
-#            return
+        if self.shouldwerun(profilelist) == False:
+            log("Menu is up to date")
+            xbmcgui.Window(10000).clearProperty("skinshortcuts-isrunning")
+            return
 
         progress = None
         # Create a progress dialog
