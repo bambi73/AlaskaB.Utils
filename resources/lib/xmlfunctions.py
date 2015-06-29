@@ -580,31 +580,35 @@ class XMLFunctions():
                     if action3Element is not None and len(action3Element.text) > 0:
                         onclicks.append(action3Element)
 
+                    if prefix == "main":
+                        onclickelement = xmltree.SubElement(newelement, "onclick")
+                        onclickelement.text = "SetProperty(AlaskaB.OnClick.HeadingChanged,1,Home)"
+
                     headingElement = mainActionElement.find("heading")
                     if headingElement is not None and len(headingElement.text) > 0:
                         if prefix == "main":
                             onclickelement = xmltree.SubElement(newelement, "onclick")
-                            onclickelement.text = "SetProperty(AlaskaB.HeadingLabel,%s,Home)" % headingElement.text
+                            onclickelement.text = "SetProperty(AlaskaB.OnClick.HeadingLabel,%s,Home)" % headingElement.text
                         else:
                             pathelement = xmltree.SubElement(newelement, "property")
                             pathelement.set("name", "%sHeading" % prefix)
                             pathelement.text = headingElement.text
                     elif prefix == "main":
                         onclickelement = xmltree.SubElement(newelement, "onclick")
-                        onclickelement.text = "SetProperty(AlaskaB.HeadingLabel,%s,home)" % labelText
+                        onclickelement.text = "SetProperty(AlaskaB.OnClick.HeadingLabel,%s,home)" % labelText
 
                     subheadingElement = mainActionElement.find("subheading")
                     if subheadingElement is not None and len(subheadingElement.text) > 0:
                         if prefix == "main":
                             onclickelement = xmltree.SubElement(newelement, "onclick")
-                            onclickelement.text = "SetProperty(AlaskaB.SubheadingLabel,%s,Home)" % subheadingElement.text
+                            onclickelement.text = "SetProperty(AlaskaB.OnClick.SubheadingLabel,%s,Home)" % subheadingElement.text
                         else:
                             pathelement = xmltree.SubElement(newelement, "property")
                             pathelement.set("name", "%sSubheading" % prefix)
                             pathelement.text = subheadingElement.text
                     elif prefix == "main":
                         onclickelement = xmltree.SubElement(newelement, "onclick")
-                        onclickelement.text = "ClearProperty(AlaskaB.SubheadingLabel,Home)"
+                        onclickelement.text = "ClearProperty(AlaskaB.OnClick.SubheadingLabel,Home)"
     
             if len(onclicks) == 0 and prefix == "main":
                 #additional onclick (group overrides)
